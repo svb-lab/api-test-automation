@@ -1,0 +1,35 @@
+<div>POST to https://fakerestapi.azurewebsites.net/api/v1/Books</div>
+
+    <h4>Body</h4>
+    <div>
+    <pre class="preformated-text">
+{
+    &quot;id&quot;: 1,
+    &quot;title&quot;: &quot;Terrible Swift Sword&quot;,
+    &quot;description&quot;: &quot;Et a optio sed aliquid sequi ut deserunt. Beatae et unde corporis aspernatur nam odit mollitia. Magni ea in sit aperiam sint sint vitae.&quot;,
+    &quot;pageCount&quot;: null,
+    &quot;excerpt&quot;: &quot;Itaque amet et qui inventore quidem ut.&quot;,
+    &quot;publishDate&quot;: &quot;2026-02-16T09:07:23.173487720Z&quot;
+}    </pre>
+    </div>
+
+    <h4>Headers</h4>
+    <div>
+            <div>Accept: application/json, application/javascript, text/javascript, text/json</div>
+            <div>Content-Type: application/json</div>
+    </div>
+
+
+
+    <h4>Curl</h4>
+    <div>
+        curl -v -X POST &#39;https://fakerestapi.azurewebsites.net/api/v1/Books&#39; -H &#39;Accept: application/json, application/javascript, text/javascript, text/json&#39; -H &#39;Content-Type: application/json&#39; -d &#39;{
+    &quot;id&quot;: 1,
+    &quot;title&quot;: &quot;Terrible Swift Sword&quot;,
+    &quot;description&quot;: &quot;Et a optio sed aliquid sequi ut deserunt. Beatae et unde corporis aspernatur nam odit mollitia. Magni ea in sit aperiam sint sint vitae.&quot;,
+    &quot;pageCount&quot;: null,
+    &quot;excerpt&quot;: &quot;Itaque amet et qui inventore quidem ut.&quot;,
+    &quot;publishDate&quot;: &quot;2026-02-16T09:07:23.173487720Z&quot;
+}&#39;
+    </div>
+
