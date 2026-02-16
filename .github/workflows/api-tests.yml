@@ -1,0 +1,100 @@
+name: API Test Automation
+
+# Triggers
+on:
+  # Run on demand - you can click "Run workflow" button in GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      parallel_enabled:
+        description: 'Enable JUnit 5 parallel test execution'
+        required: false
+        default: false
+        type: boolean
+  
+  # Optional: Also run on push to main/master
+  # push:
+  #   branches: [ main, master ]
+  
+  # Optional: Also run on pull requests
+  # pull_request:
+  #   branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Step 2: Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t api-tests .
+      
+      # Step 3: Run tests in Docker container
+      - name: Run tests
+        run: |
+          PARALLEL="${{ github.event.inputs.parallel_enabled || 'false' }}"
+
+          # Create output directory
+          mkdir -p test-results
+
+          # Run Docker container with parameters
+          docker run --rm \
+            -e API_BASE_URL=https://fakerestapi.azurewebsites.net \
+            -e PARALLEL_ENABLED=$PARALLEL \
+            -v $(pwd)/test-results:/output \
+            api-tests || true
+
+          # Note: "|| true" ensures job continues even if tests fail
+          # This allows us to upload reports even when tests fail
+      
+      # Step 4: Upload Allure results
+      - name: Upload Allure Results
+        if: always()  # Run even if tests failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: test-results/allure-results/
+          retention-days: 30
+      
+      # Step 5: Upload Allure HTML Report
+      - name: Upload Allure HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-html-report
+          path: test-results/allure-report/
+          retention-days: 30
+      
+      # Step 6: Publish Allure Report (viewable in GitHub Pages)
+      - name: Publish Allure Report
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: test-results/allure-report/
+          destination_dir: allure-report
+          keep_files: false
+      
+      # Step 7: Display test results summary
+      - name: Test Results Summary
+        if: always()
+        run: |
+          echo "# Test Execution Complete! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Reports Available:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Allure HTML Report**: Download artifact 'allure-html-report' and open index.html" >> $GITHUB_STEP_SUMMARY
+          echo "- **Allure Results**: Download artifact 'allure-results'" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # If GitHub Pages is enabled, show the link
+          if [ -d "test-results/allure-report" ]; then
+            REPO_NAME="${{ github.repository }}"
+            echo "## 🌐 View Allure Report Online:" >> $GITHUB_STEP_SUMMARY
+            echo "https://${{ github.repository_owner }}.github.io/${REPO_NAME#*/}/allure-report/" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Main API test service
+  api-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-test-automation
+    environment:
+      - API_BASE_URL=https://fakerestapi.azurewebsites.net
+      - PARALLEL_ENABLED=false
+      
+    volumes:
+      - ./test-results:/output
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
